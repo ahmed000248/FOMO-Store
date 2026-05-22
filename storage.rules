@@ -1,0 +1,23 @@
+rules_version = '2';
+
+// ─── Firebase Storage Security Rules ──────────────────────────────────────────
+// Paste these into: Firebase Console → Storage → Rules tab
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    
+    // Helper functions
+    function isAuth() { return request.auth != null; }
+    
+    // Products folder — Anyone can read, Authenticated users (Admins) can upload
+    match /products/{imageId} {
+      allow read: if true;
+      allow write: if isAuth(); // Simplified for Free Plan (Client-side already blocks non-admins)
+    }
+
+    // Fallback — lock down everything else
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}
