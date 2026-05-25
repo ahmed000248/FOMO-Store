@@ -13,11 +13,11 @@ import { useSettings } from '../context/SettingsContext';
 import { StatCardSkeleton } from '../components/ui/skeletons/Skeletons';
 
 const statusColors = {
-  pending:    'text-accent-amber   bg-accent-amber/10',
+  pending: 'text-accent-amber   bg-accent-amber/10',
   processing: 'text-accent-sky    bg-accent-sky/10',
-  shipped:    'text-accent-violet  bg-accent-violet/10',
-  delivered:  'text-accent-emerald bg-accent-emerald/10',
-  cancelled:  'text-accent-rose    bg-accent-rose/10',
+  shipped: 'text-accent-violet  bg-accent-violet/10',
+  delivered: 'text-accent-emerald bg-accent-emerald/10',
+  cancelled: 'text-accent-rose    bg-accent-rose/10',
 };
 
 // ── Mini bar chart for revenue trend ────────────────────────────────────────
@@ -68,10 +68,10 @@ function RevenueChart({ data }) {
 // ── Order status breakdown ───────────────────────────────────────────────────
 function OrderStatusBreakdown({ stats }) {
   const items = [
-    { label: 'Pending',    value: stats.pendingOrders,    icon: RiTimeLine,          color: '#f59e0b', bg: 'bg-accent-amber/10'  },
-    { label: 'Processing', value: stats.processingOrders, icon: RiShoppingBagLine,   color: '#38bdf8', bg: 'bg-accent-sky/10'    },
-    { label: 'Delivered',  value: stats.deliveredOrders,  icon: RiCheckboxCircleLine, color: '#10b981', bg: 'bg-accent-emerald/10' },
-    { label: 'Cancelled',  value: stats.cancelledOrders,  icon: RiCloseCircleLine,   color: '#f43f5e', bg: 'bg-accent-rose/10'   },
+    { label: 'Pending', value: stats.pendingOrders, icon: RiTimeLine, color: '#f59e0b', bg: 'bg-accent-amber/10' },
+    { label: 'Processing', value: stats.processingOrders, icon: RiShoppingBagLine, color: '#38bdf8', bg: 'bg-accent-sky/10' },
+    { label: 'Delivered', value: stats.deliveredOrders, icon: RiCheckboxCircleLine, color: '#10b981', bg: 'bg-accent-emerald/10' },
+    { label: 'Cancelled', value: stats.cancelledOrders, icon: RiCloseCircleLine, color: '#f43f5e', bg: 'bg-accent-rose/10' },
   ];
   const total = stats.totalOrders || 1;
 
@@ -186,22 +186,22 @@ function TopSellingProducts({ products }) {
 export default function AdminOverview() {
   const { settings } = useSettings();
   const sym = settings.currencySymbol || 'Rs.';
-  const [analytics,     setAnalytics]     = useState(null);
-  const [topProducts,   setTopProducts]   = useState([]);
-  const [lowStock,      setLowStock]      = useState([]);
-  const [loading,       setLoading]       = useState(true);
-  const [resetting,     setResetting]     = useState(false);
+  const [analytics, setAnalytics] = useState(null);
+  const [topProducts, setTopProducts] = useState([]);
+  const [lowStock, setLowStock] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [resetting, setResetting] = useState(false);
 
   const handleResetOrders = async () => {
     if (!window.confirm("⚠️ DANGER ZONE: Are you sure you want to permanently delete and reset ALL store orders? This action cannot be undone.")) {
       return;
     }
-    
+
     setResetting(true);
     try {
       const { db } = await import('../firebase/config');
       const { collection, getDocs, deleteDoc, doc } = await import('firebase/firestore');
-      
+
       const snap = await getDocs(collection(db, 'orders'));
       if (snap.size === 0) {
         alert("No orders found to delete.");
@@ -231,40 +231,40 @@ export default function AdminOverview() {
       setLoading(false);
     });
 
-    getTopSellingProducts(5).then(setTopProducts).catch(() => {});
-    getLowStockProducts(5).then(setLowStock).catch(() => {});
+    getTopSellingProducts(5).then(setTopProducts).catch(() => { });
+    getLowStockProducts(5).then(setLowStock).catch(() => { });
 
     return unsub;
   }, []);
 
   const statCards = analytics ? [
     {
-      label:  'Total Revenue',
-      value:  `${sym} ${analytics.totalRevenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
-      icon:   RiMoneyDollarCircleLine,
-      color:  '#8b5cf6',
-      sub:    `${sym} ${analytics.avgOrderValue.toFixed(2)} avg order`,
+      label: 'Total Revenue',
+      value: `${sym} ${analytics.totalRevenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+      icon: RiMoneyDollarCircleLine,
+      color: '#8b5cf6',
+      sub: `${sym} ${analytics.avgOrderValue.toFixed(2)} avg order`,
     },
     {
-      label:  'Total Orders',
-      value:  analytics.totalOrders,
-      icon:   RiListOrdered,
-      color:  '#38bdf8',
-      sub:    `${analytics.pendingOrders} pending`,
+      label: 'Total Orders',
+      value: analytics.totalOrders,
+      icon: RiListOrdered,
+      color: '#38bdf8',
+      sub: `${analytics.pendingOrders} pending`,
     },
     {
-      label:  'Products',
-      value:  analytics.totalProducts,
-      icon:   RiShoppingBagLine,
-      color:  '#f59e0b',
-      sub:    lowStock.length ? `${lowStock.length} low stock` : 'All stocked',
+      label: 'Products',
+      value: analytics.totalProducts,
+      icon: RiShoppingBagLine,
+      color: '#f59e0b',
+      sub: lowStock.length ? `${lowStock.length} low stock` : 'All stocked',
     },
     {
-      label:  'Customers',
-      value:  analytics.totalUsers,
-      icon:   RiUserLine,
-      color:  '#10b981',
-      sub:    `${analytics.todayVisits || 0} visits today`,
+      label: 'Customers',
+      value: analytics.totalUsers,
+      icon: RiUserLine,
+      color: '#10b981',
+      sub: `${analytics.todayVisits || 0} visits today`,
     },
   ] : [];
 

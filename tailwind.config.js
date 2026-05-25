@@ -6,10 +6,10 @@ export default {
     extend: {
       colors: {
         bg: {
-          primary: '#080b14',
-          secondary: '#0f172a',
-          surface: '#1e293b',
-          glass: 'rgba(30,41,59,0.6)',
+          primary: 'rgb(var(--bg-primary-rgb) / <alpha-value>)',
+          secondary: 'rgb(var(--bg-secondary-rgb) / <alpha-value>)',
+          surface: 'rgb(var(--bg-surface-rgb) / <alpha-value>)',
+          glass: 'rgb(var(--bg-glass-rgb) / <alpha-value>)',
         },
         accent: {
           violet: '#8b5cf6',
@@ -19,9 +19,9 @@ export default {
           emerald: '#10b981',
         },
         text: {
-          primary: '#f8fafc',
-          secondary: '#cbd5e1',
-          muted: '#64748b',
+          primary: 'rgb(var(--text-primary-rgb) / <alpha-value>)',
+          secondary: 'rgb(var(--text-secondary-rgb) / <alpha-value>)',
+          muted: 'rgb(var(--text-muted-rgb) / <alpha-value>)',
         },
       },
       fontFamily: {

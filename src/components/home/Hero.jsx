@@ -30,91 +30,55 @@ const PARTICLES = Array.from({ length: 18 }, (_, i) => ({
 
 export default function Hero() {
   const { settings } = useSettings();
-  const sectionRef = useRef(null);
 
   const brandName = settings?.storeName || 'FOMO';
   const heroSubtitle =
     settings?.heroSubtitle ||
-    'Explore pieces that redefine modern luxury — crafted for those who move through the world with intention.';
-  const titleLines = (settings?.heroTitle || 'Where Dark\nMeets Refined').split(/\\n|\n/);
-  const titleLine1 = titleLines[0] || 'Where Dark';
-  const titleLine2 = titleLines[1] || 'Meets Refined';
+    'If you know, you know. Exclusive apparel for the digitally native. Our limited release collection blends high-fashion silhouettes with utilitarian hardware.';
+  
+  const titleLines = (settings?.heroTitle || 'NEVER MISS\nThe DROP').split(/\\n|\n/);
+  const titleLine1 = titleLines[0] || 'NEVER MISS';
+  const titleLine2 = titleLines[1] || 'The DROP';
 
-  // Curated product imagery
-  const mainProductImg   = settings?.heroBannerUrl || 'https://images.unsplash.com/photo-1611312449412-6cefac5dc3e4?auto=format&fit=crop&w=800&q=80';
-  const secondaryImg     = 'https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?auto=format&fit=crop&w=400&q=80';
-  const detailImg        = 'https://images.unsplash.com/photo-1541099649105-f69ad21f3246?auto=format&fit=crop&w=400&q=80';
-
-  // Smooth spring-based mouse parallax
-  const rawX = useMotionValue(0);
-  const rawY = useMotionValue(0);
-  const springX = useSpring(rawX, { stiffness: 60, damping: 18 });
-  const springY = useSpring(rawY, { stiffness: 60, damping: 18 });
-
-  const glowX    = useTransform(springX, [-0.5, 0.5], [-40, 40]);
-  const glowY    = useTransform(springY, [-0.5, 0.5], [-40, 40]);
-  const productX = useTransform(springX, [-0.5, 0.5], [-18, 18]);
-  const productY = useTransform(springY, [-0.5, 0.5], [-18, 18]);
-  const card1X   = useTransform(springX, [-0.5, 0.5], [-10, 10]);
-  const card2X   = useTransform(springX, [-0.5, 0.5], [10, -10]);
-
-  const handleMouseMove = (e) => {
-    const rect = sectionRef.current?.getBoundingClientRect();
-    if (!rect) return;
-    rawX.set((e.clientX - rect.left) / rect.width - 0.5);
-    rawY.set((e.clientY - rect.top) / rect.height - 0.5);
-  };
+  // Stitch high-resolution imagery assets
+  const mainProductImg = settings?.heroBannerUrl || 'https://lh3.googleusercontent.com/aida-public/AB6AXuB9mchCwjDfUPKqPpxwyg_Zk2B98ZgAlmaRo7I2SjA2V2OxXqJfcvmlJUmK730uTs_11czO3yDz1Wz7_ooKzDupmdsR7VVeX_i1ubgA0t1pVgoWPm4_5YaUFYawNNEbmI692UW14f111MaoSrr8b3k2if-dVziAcQCDJzPn6570yjCBy1v-rZrIX1_nkeKqwrJuiv6iCTI1fOP5SGwOG0Cu4qeZKPk5QUHAyk79_TloeLwCaBFoVoAGc50qpWMxxyorAOad6nYUeAI';
+  const secondaryImg   = 'https://lh3.googleusercontent.com/aida-public/AB6AXuDKKCTM5JSmCN8beAah8CjMKW9yldUgKzZSULux1EsRsbJR2F3oVh_Jpd94hPvBm3h0zp2EiEz_dlCewEAFbGTNaJPoqOK3NQ3YuACG_BauZFk4I1KGSYKqwozy06tPCK7SpOTdaFiOD6_zr51uEbz03aOv4Ob_z811HtNvAXMki1rHmgVRlaGl8WQaeSiPZtT-Btnup0KsDLW9qUuQt-BPMf8ZKxzrZRQwCkDExH5AzPu53dv_XlxnOfpmg6Hl-0ir8qPHnvrREpE';
+  const detailImg      = 'https://lh3.googleusercontent.com/aida-public/AB6AXuDV01rAgkUTHLIplEl9Y6mY0bo7yiJTjFeLwjqLWy8UbL7wa1Dsix6emLdIsJ3xnoGhX4zJbWo2NlCzVTSQlU6Vntr9Na_rWrrVK0kizjT--zi2mPz6bOkVdCorFTD-lBt_tfwANTjoAbb2pjtMciNH6WF5tSNy3GLE42yXPZkdHbDd-KyKOm7PVoyY4LZo8DZhBtvVlzHYbooJDXDFRAl9yOfYGVMVdb8wLKoWmbHYOML0ubtd5r7DAjcidd3ZgiapfmUU3jVsbEU';
 
   return (
-    <section
-      ref={sectionRef}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={() => { rawX.set(0); rawY.set(0); }}
-      className="relative min-h-screen flex items-center justify-center overflow-hidden bg-[#050505] pt-24 pb-16 lg:py-0 select-none"
-    >
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-bg-primary pt-32 pb-32 lg:py-0 select-none transition-colors duration-300">
       {/* ═══════════ BACKGROUND SYSTEM ═══════════ */}
       <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-
-        {/* Primary violet glow — breathes with parallax */}
-        <motion.div
-          animate={{ scale: [1, 1.15, 1], opacity: [0.18, 0.28, 0.18] }}
-          transition={{ duration: 11, repeat: Infinity, ease: 'easeInOut' }}
+        {/* Ambient Watercolor Glows */}
+        <div
           className="absolute -top-[20%] left-[5%] w-[650px] h-[650px] rounded-full blur-[160px]"
-          style={{ x: glowX, y: glowY, background: 'radial-gradient(circle, #7c3aed 0%, transparent 65%)' }}
+          style={{ background: 'radial-gradient(circle, var(--hero-glow-1) 0%, transparent 65%)' }}
         />
-
-        {/* Secondary sky glow */}
-        <motion.div
-          animate={{ scale: [1, 1.1, 1], opacity: [0.10, 0.20, 0.10] }}
-          transition={{ duration: 14, repeat: Infinity, ease: 'easeInOut', delay: 3 }}
+        <div
           className="absolute -bottom-[25%] right-[2%] w-[750px] h-[750px] rounded-full blur-[190px]"
-          style={{ x: glowX, y: glowY, background: 'radial-gradient(circle, #0284c7 0%, transparent 65%)' }}
+          style={{ background: 'radial-gradient(circle, var(--hero-glow-2) 0%, transparent 65%)' }}
         />
-
-        {/* Accent rose mid-glow */}
-        <motion.div
-          animate={{ scale: [1, 1.08, 1], opacity: [0.06, 0.12, 0.06] }}
-          transition={{ duration: 9, repeat: Infinity, ease: 'easeInOut', delay: 1.5 }}
+        <div
           className="absolute top-[25%] left-[45%] w-[500px] h-[500px] rounded-full blur-[140px]"
-          style={{ background: 'radial-gradient(circle, #e11d48 0%, transparent 65%)' }}
+          style={{ background: 'radial-gradient(circle, var(--hero-glow-3) 0%, transparent 65%)' }}
         />
 
-        {/* Fine architectural grid */}
+        {/* Fine Architectural Grid */}
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808008_1px,transparent_1px),linear-gradient(to_bottom,#80808008_1px,transparent_1px)] bg-[size:48px_48px] [mask-image:radial-gradient(ellipse_65%_55%_at_50%_50%,#000_75%,transparent_100%)]" />
 
-        {/* Animated particle dots */}
+        {/* Animated Particle Dots */}
         {PARTICLES.map(p => (
           <motion.div
             key={p.id}
-            className="absolute rounded-full bg-white"
-            style={{ left: p.x, top: p.y, width: p.size, height: p.size, opacity: p.opacity }}
-            animate={{ y: [0, -20, 0], opacity: [p.opacity, p.opacity * 2, p.opacity] }}
+            className="absolute rounded-full bg-accent-violet dark:bg-white"
+            style={{ left: p.x, top: p.y, width: p.size, height: p.size, opacity: p.opacity * 0.7 }}
+            animate={{ y: [0, -20, 0], opacity: [p.opacity * 0.7, p.opacity * 1.4, p.opacity * 0.7] }}
             transition={{ duration: p.dur, repeat: Infinity, ease: 'easeInOut', delay: p.delay }}
           />
         ))}
 
-        {/* Diagonal cinematic vignette */}
-        <div className="absolute inset-0 bg-gradient-to-br from-black/30 via-transparent to-black/30" />
+        {/* Diagonal Cinematic Vignette */}
+        <div className="absolute inset-0 bg-gradient-to-br dark:from-black/30 from-white/10 via-transparent dark:to-black/30 to-white/10" />
       </div>
 
       {/* ═══════════ MAIN GRID ═══════════ */}
@@ -125,37 +89,31 @@ export default function Hero() {
           variants={stagger}
           initial="hidden"
           animate="show"
-          className="lg:col-span-6 flex flex-col justify-center space-y-8 relative"
+          className="lg:col-span-7 flex flex-col justify-center space-y-8 relative"
         >
           {/* Soft typography back-glow */}
           <div className="absolute -left-16 -top-16 w-[500px] h-[500px] bg-accent-violet/[0.04] blur-[120px] rounded-full pointer-events-none -z-10" />
 
           {/* ── DROP badge ── */}
-          <motion.div variants={fadeUp} className="inline-flex items-center gap-2.5 px-4 py-2 w-fit rounded-full border border-white/[0.08] bg-white/[0.02] backdrop-blur-sm">
-            <motion.span
-              animate={{ scale: [1, 1.3, 1], opacity: [0.8, 1, 0.8] }}
-              transition={{ duration: 2, repeat: Infinity }}
-            >
-              <RiFireLine className="text-accent-amber" size={13} />
-            </motion.span>
-            <span className="text-[10px] font-bold tracking-[0.28em] uppercase text-text-secondary">
+          <motion.div variants={fadeUp} className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-text-primary/10 dark:border-white/10 bg-text-primary/5 dark:bg-white/5 backdrop-blur-sm w-fit">
+            <span className="w-2 h-2 rounded-full bg-[#00FFC2] shadow-[0_0_8px_#00FFC2]" />
+            <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-text-primary">
               DROP 02 / READY TO SHIP
             </span>
-            <span className="w-1.5 h-1.5 rounded-full bg-accent-emerald animate-pulse" />
           </motion.div>
 
           {/* ── Cinematic heading ── */}
           <motion.div variants={fadeUp} className="space-y-3 overflow-hidden">
-            <h1 className="font-display leading-[0.88] flex flex-col">
-              <span className="block text-6xl sm:text-7xl lg:text-[5.5rem] font-black tracking-tighter text-white">
+            <h1 className="font-display-xl leading-[0.9] flex flex-col tracking-tighter">
+              <span className="block text-6xl sm:text-7xl lg:text-[5.5rem] font-black text-text-primary">
                 {titleLine1.toUpperCase()}
               </span>
               <span
-                className="block text-6xl sm:text-7xl lg:text-[5.5rem] font-light italic font-serif text-transparent bg-clip-text pl-3"
+                className="block text-6xl sm:text-7xl lg:text-[5.5rem] font-light italic font-serif text-transparent bg-clip-text pl-2"
                 style={{
                   backgroundImage: 'linear-gradient(135deg, #38bdf8 0%, #818cf8 40%, #e879f9 80%, #fb7185 100%)',
                   WebkitBackgroundClip: 'text',
-                  filter: 'drop-shadow(0 0 30px rgba(124,58,237,0.3))',
+                  filter: 'drop-shadow(0 0 30px rgba(124,58,237,0.25))',
                 }}
               >
                 {titleLine2}
@@ -166,7 +124,7 @@ export default function Hero() {
           {/* ── Subtitle ── */}
           <motion.p
             variants={fadeUp}
-            className="text-text-muted text-base sm:text-[1.05rem] leading-relaxed max-w-[440px] font-light tracking-wide"
+            className="text-text-secondary text-base sm:text-[1.05rem] leading-relaxed max-w-lg font-light"
           >
             {heroSubtitle}
           </motion.p>
@@ -174,14 +132,14 @@ export default function Hero() {
           {/* ── Trust metrics ── */}
           <motion.div variants={fadeUp} className="flex flex-wrap items-center gap-4 text-[10.5px] font-semibold uppercase tracking-[0.16em]">
             <span className="flex items-center gap-1.5 text-text-primary">
-              <RiStarFill className="text-accent-amber" size={11} />
+              <RiStarFill className="text-accent-amber" size={12} />
               4.9★ Rating
             </span>
-            <span className="w-1 h-1 rounded-full bg-white/15" />
+            <span className="w-1 h-1 rounded-full bg-text-muted/30" />
             <span className="text-text-muted">10K+ Customers</span>
-            <span className="w-1 h-1 rounded-full bg-white/15" />
+            <span className="w-1 h-1 rounded-full bg-text-muted/30" />
             <span className="text-text-muted flex items-center gap-1.5">
-              <RiCheckboxCircleLine size={11} className="text-accent-emerald" />
+              <RiCheckboxCircleLine size={12} className="text-accent-emerald" />
               Fast Shipping
             </span>
           </motion.div>
@@ -191,250 +149,123 @@ export default function Hero() {
             {/* Primary CTA */}
             <Link to="/products">
               <motion.button
-                whileHover={{ scale: 1.04, y: -3 }}
-                whileTap={{ scale: 0.97 }}
-                className="relative group px-8 py-4 rounded-2xl bg-white text-black font-bold text-sm flex items-center gap-2.5 overflow-hidden shadow-[0_8px_32px_rgba(255,255,255,0.12)]"
+                whileHover={{ scale: 1.03, y: -2 }}
+                whileTap={{ scale: 0.98 }}
+                className="px-10 py-5 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white rounded-full font-bold text-xs uppercase tracking-widest hover:shadow-lg hover:shadow-violet-500/20 active:scale-[0.98] transition-all flex items-center gap-3 cursor-pointer shadow-md"
               >
-                {/* Shimmer */}
-                <motion.div
-                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full"
-                  animate={{ translateX: ['−100%', '200%'] }}
-                  transition={{ duration: 2.5, repeat: Infinity, repeatDelay: 2 }}
-                />
                 Shop Collection
-                <RiArrowRightLine className="group-hover:translate-x-1.5 transition-transform duration-300" size={16} />
+                <RiArrowRightLine size={14} />
               </motion.button>
             </Link>
 
             {/* Secondary glass CTA */}
             <Link to="/products?category=t-shirts">
               <motion.button
-                whileHover={{ scale: 1.04, y: -3 }}
-                whileTap={{ scale: 0.97 }}
-                className="px-8 py-4 rounded-2xl border border-white/12 bg-white/[0.03] backdrop-blur-md text-white font-semibold text-sm flex items-center gap-2.5 hover:border-white/25 hover:bg-white/[0.07] transition-all duration-300 shadow-lg"
+                whileHover={{ scale: 1.03, y: -2 }}
+                whileTap={{ scale: 0.98 }}
+                className="px-10 py-5 glass rounded-full font-bold text-xs uppercase tracking-widest text-text-primary hover:bg-text-primary/10 transition-all border border-text-primary/10 hover:border-text-primary/20 cursor-pointer shadow-sm"
               >
                 Explore Essentials
               </motion.button>
             </Link>
           </motion.div>
 
-          {/* ── Floating glassmorphism feature tags ── */}
-          <motion.div variants={fadeUp} className="flex flex-wrap gap-2.5 max-w-[480px]">
+          {/* ── Feature tags ── */}
+          <motion.div variants={fadeUp} className="flex flex-wrap gap-2.5 max-w-lg">
             {[
-              { text: 'Premium Fabric',     color: 'border-violet-500/25 text-violet-400', r: -2, d: 0.0 },
-              { text: 'Nationwide Delivery', color: 'border-sky-500/25 text-sky-400',      r:  3, d: 0.12 },
-              { text: 'Cash On Delivery',   color: 'border-rose-500/25 text-rose-400',    r: -1, d: 0.24 },
-              { text: 'Oversized Fits',     color: 'border-emerald-500/25 text-emerald-400', r: 2, d: 0.36 },
+              { text: 'Premium Fabric',     color: 'dark:border-violet-500/25 border-violet-500/15 dark:text-violet-400 text-violet-600' },
+              { text: 'Nationwide Delivery', color: 'dark:border-sky-500/25 border-sky-500/15 dark:text-sky-400 text-sky-600' },
+              { text: 'Cash On Delivery',   color: 'dark:border-rose-500/25 border-rose-500/15 dark:text-rose-400 text-rose-600' },
+              { text: 'Oversized Fits',     color: 'dark:border-emerald-500/25 border-emerald-500/15 dark:text-emerald-400 text-emerald-600' },
             ].map((tag, idx) => (
-              <motion.span
+              <span
                 key={idx}
-                initial={{ opacity: 0, scale: 0.85 }}
-                animate={{
-                  opacity: 1, scale: 1,
-                  y: [-5, 5, -5],
-                  rotate: [tag.r - 1, tag.r + 1, tag.r - 1],
-                }}
-                transition={{
-                  opacity: { delay: 0.6 + tag.d, duration: 0.4 },
-                  scale:   { delay: 0.6 + tag.d, duration: 0.4 },
-                  y:       { duration: 4 + idx * 0.5, repeat: Infinity, ease: 'easeInOut' },
-                  rotate:  { duration: 5 + idx * 0.5, repeat: Infinity, ease: 'easeInOut' },
-                }}
-                className={`px-3.5 py-2 rounded-xl text-[9.5px] font-bold tracking-[0.18em] uppercase border bg-white/[0.02] backdrop-blur-sm ${tag.color}`}
+                className={`px-4 py-2 bg-text-primary/5 dark:bg-white/5 rounded-lg border text-[10px] font-bold tracking-wide uppercase transition-all hover:bg-text-primary/10 ${tag.color}`}
               >
                 {tag.text}
-              </motion.span>
+              </span>
             ))}
           </motion.div>
         </motion.div>
 
         {/* ───────────────── RIGHT SIDE ───────────────── */}
-        <div className="lg:col-span-6 relative h-[520px] sm:h-[640px] lg:h-[780px] flex items-center justify-center">
+        <div className="lg:col-span-5 relative h-[520px] sm:h-[640px] lg:h-[720px] flex items-center justify-center">
 
-          {/* Huge low-opacity brand watermark */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 0.028, scale: 1 }}
-            transition={{ duration: 2, ease: 'easeOut', delay: 0.5 }}
-            className="absolute inset-0 flex items-center justify-center font-display font-black text-[22vw] lg:text-[16vw] tracking-[0.15em] text-white select-none pointer-events-none z-0"
-          >
-            {brandName.toUpperCase()}
-          </motion.div>
-
-          {/* Ambient glow beneath product */}
-          <motion.div
-            animate={{ scale: [1, 1.15, 1], opacity: [0.12, 0.22, 0.12] }}
-            transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut' }}
-            className="absolute w-[340px] h-[340px] rounded-full blur-[110px] z-0 pointer-events-none"
-            style={{ background: 'radial-gradient(circle, #7c3aed 0%, transparent 70%)' }}
-          />
+          {/* Top-left secondary floating image */}
+          <div className="absolute -top-6 -left-8 w-40 h-56 rounded-xl overflow-hidden border border-text-primary/10 dark:border-white/10 shadow-2xl z-20 hidden xl:block transition-all duration-500 hover:-translate-y-2">
+            <img className="w-full h-full object-cover" src={secondaryImg} alt="Denim texture close-up" />
+          </div>
 
           {/* ══ MAIN PRODUCT IMAGE ══ */}
-          <motion.div
-            style={{ x: productX, y: productY }}
-            initial={{ opacity: 0, scale: 0.88, y: 60 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            transition={{ duration: 1.3, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
-            className="absolute z-10 w-[64%] sm:w-[52%]"
-          >
-            <motion.div
-              animate={{ y: [-14, 14, -14] }}
-              transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut' }}
-              className="aspect-[3/4] rounded-[36px] overflow-hidden shadow-[0_60px_120px_rgba(0,0,0,0.85)] border border-white/[0.08] group cursor-pointer relative"
-            >
+          <div className="relative group w-[85%] lg:w-[80%] mx-auto transition-all duration-500">
+            <div className="aspect-[4/5] rounded-[2rem] overflow-hidden border border-text-primary/10 dark:border-white/10 relative shadow-[0_40px_100px_rgba(0,0,0,0.2)] dark:shadow-[0_40px_100px_rgba(0,0,0,0.6)]">
               <img
                 src={mainProductImg}
-                alt="Premium streetwear jacket"
-                className="w-full h-full object-cover transition-transform duration-[1.2s] group-hover:scale-106"
-                style={{ willChange: 'transform' }}
+                alt="Selvedge denim jacket"
+                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
               />
-              {/* Inner vignette */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/88 via-black/15 to-transparent pointer-events-none" />
-              {/* Side edge shadow for depth */}
-              <div className="absolute inset-0 bg-gradient-to-r from-black/20 via-transparent to-black/20 pointer-events-none" />
+              {/* Inner gradient vignette */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent flex flex-col justify-end p-8" />
 
-              {/* Product label */}
-              <div className="absolute bottom-7 left-7 right-7">
-                <span className="inline-block text-[8.5px] font-bold tracking-[0.28em] uppercase text-accent-sky bg-accent-sky/10 border border-accent-sky/20 px-3 py-1 rounded-full mb-2">
+              {/* Product labels */}
+              <div className="absolute bottom-8 left-8 right-8 z-10">
+                <span className="inline-block text-[9px] font-bold tracking-[0.2em] uppercase text-accent-sky bg-accent-sky/10 border border-accent-sky/20 px-3 py-1 rounded-full mb-2">
                   RAW SELVEDGE / DROP 02
                 </span>
-                <h4 className="text-white text-lg font-bold font-display tracking-wide leading-tight">
+                <h4 className="text-white text-xl font-bold font-display tracking-wide leading-tight">
                   Selvedge Denim Jacket
                 </h4>
-                <p className="text-white/50 text-xs mt-0.5 font-light">Raw Indigo · Heavyweight Weave</p>
+                <p className="text-white/60 text-xs mt-0.5 font-light">Raw Indigo · Heavyweight Weave</p>
               </div>
-            </motion.div>
-          </motion.div>
+            </div>
 
-          {/* ══ SECONDARY THUMBNAIL — bottom-left ══ */}
-          <motion.div
-            style={{ x: card2X }}
-            initial={{ opacity: 0, x: -40, y: 40 }}
-            animate={{ opacity: 1, x: 0, y: [20, -8, 20] }}
-            transition={{
-              opacity: { duration: 0.6, delay: 1 },
-              x:       { duration: 0.6, delay: 1 },
-              y:       { duration: 6, repeat: Infinity, ease: 'easeInOut', delay: 1 },
-            }}
-            className="absolute bottom-12 left-0 z-20 w-[22%] sm:w-[18%] aspect-[2/3] rounded-2xl overflow-hidden border border-white/10 shadow-2xl"
-          >
-            <img src={secondaryImg} alt="Hoodie texture" className="w-full h-full object-cover" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-          </motion.div>
+            {/* Floating Badges */}
+            {/* Premium Cut badge */}
+            <div className="absolute -right-10 top-1/2 -translate-y-1/2 glass px-6 py-4 rounded-2xl flex items-center gap-4 border border-text-primary/10 dark:border-white/10 shadow-2xl z-30 max-w-[220px] transition-all duration-500 hover:scale-105">
+              <div className="w-10 h-10 rounded-full bg-accent-violet/10 flex items-center justify-center text-accent-violet flex-shrink-0">
+                <RiAwardLine size={18} />
+              </div>
+              <div>
+                <p className="text-[11px] font-bold text-text-primary uppercase mb-0.5">Premium Cut</p>
+                <p className="text-[9px] text-text-muted uppercase font-medium leading-tight">Custom Drape & Fit Engineered for Comfort</p>
+              </div>
+            </div>
 
-          {/* ══ SECONDARY THUMBNAIL — top-left ══ */}
-          <motion.div
-            style={{ x: card2X }}
-            initial={{ opacity: 0, x: -30, y: -30 }}
-            animate={{ opacity: 1, x: 0, y: [-12, 12, -12] }}
-            transition={{
-              opacity: { duration: 0.6, delay: 1.3 },
-              x:       { duration: 0.6, delay: 1.3 },
-              y:       { duration: 5.5, repeat: Infinity, ease: 'easeInOut', delay: 0.5 },
-            }}
-            className="absolute top-14 left-0 z-20 w-[19%] sm:w-[15%] aspect-[2/3] rounded-2xl overflow-hidden border border-white/10 shadow-2xl"
-          >
-            <img src={detailImg} alt="Canvas pants detail" className="w-full h-full object-cover" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-          </motion.div>
+            {/* Heavyweight Fabric badge */}
+            <div className="absolute -bottom-8 -left-4 glass px-5 py-4 rounded-2xl flex items-center gap-4 border border-text-primary/10 dark:border-white/10 shadow-2xl z-30 transition-all duration-500 hover:scale-105">
+              <div className="w-9 h-9 rounded-xl bg-accent-sky/10 flex items-center justify-center text-accent-sky flex-shrink-0">
+                <RiFireLine size={18} />
+              </div>
+              <div>
+                <p className="text-[11px] font-bold text-text-primary uppercase mb-0.5">Heavyweight Fabric</p>
+                <p className="text-[9px] text-text-muted uppercase font-medium">450GSM Terry Loop</p>
+              </div>
+            </div>
+          </div>
 
-          {/* ══ FLOATING CARD 1 — Trending (top-right) ══ */}
-          <motion.div
-            style={{ x: card1X }}
-            initial={{ opacity: 0, x: 50, y: -30 }}
-            animate={{
-              opacity: 1, x: 0,
-              y: [-12, 12, -12],
-              rotate: [1, -1, 1],
-            }}
-            transition={{
-              opacity: { duration: 0.5, delay: 0.7 },
-              x:       { duration: 0.5, delay: 0.7 },
-              y:       { duration: 5.2, repeat: Infinity, ease: 'easeInOut', delay: 0.5 },
-              rotate:  { duration: 6,   repeat: Infinity, ease: 'easeInOut' },
-            }}
-            className="absolute top-10 right-4 sm:right-8 z-20 bg-white/[0.04] backdrop-blur-xl border border-white/[0.1] px-4 py-3 rounded-2xl flex items-center gap-3 shadow-2xl"
-          >
-            <div className="w-9 h-9 rounded-xl bg-rose-500/15 flex items-center justify-center text-rose-400 flex-shrink-0">
-              <RiFireLine size={17} />
-            </div>
-            <div>
-              <p className="text-[9px] font-bold tracking-widest text-white/40 uppercase">TRENDING NOW</p>
-              <p className="text-white text-xs font-semibold mt-0.5">Drop 02 · Limited</p>
-            </div>
-          </motion.div>
-
-          {/* ══ FLOATING CARD 2 — Fabric (bottom-right) ══ */}
-          <motion.div
-            style={{ x: card1X }}
-            initial={{ opacity: 0, x: 50, y: 40 }}
-            animate={{
-              opacity: 1, x: 0,
-              y: [14, -10, 14],
-              rotate: [-1.5, 1.5, -1.5],
-            }}
-            transition={{
-              opacity: { duration: 0.5, delay: 0.9 },
-              x:       { duration: 0.5, delay: 0.9 },
-              y:       { duration: 5.8, repeat: Infinity, ease: 'easeInOut', delay: 1 },
-              rotate:  { duration: 7,   repeat: Infinity, ease: 'easeInOut' },
-            }}
-            className="absolute bottom-20 right-2 sm:right-6 z-20 bg-white/[0.04] backdrop-blur-xl border border-white/[0.1] px-4 py-3 rounded-2xl flex items-center gap-3 shadow-2xl"
-          >
-            <div className="w-9 h-9 rounded-xl bg-violet-500/15 flex items-center justify-center text-violet-400 flex-shrink-0">
-              <RiAwardLine size={17} />
-            </div>
-            <div>
-              <p className="text-[9px] font-bold tracking-widest text-white/40 uppercase">HEAVYWEIGHT FABRIC</p>
-              <p className="text-white text-xs font-semibold mt-0.5">450GSM Terry Loop</p>
-            </div>
-          </motion.div>
-
-          {/* ══ FLOATING CARD 3 — Premium Cut (mid-right) ══ */}
-          <motion.div
-            style={{ x: card1X }}
-            initial={{ opacity: 0, scale: 0.75 }}
-            animate={{
-              opacity: 1, scale: 1,
-              y: [-9, 9, -9],
-              rotate: [1.5, -1.5, 1.5],
-            }}
-            transition={{
-              opacity: { duration: 0.5, delay: 1.1 },
-              scale:   { duration: 0.5, delay: 1.1 },
-              y:       { duration: 4.8, repeat: Infinity, ease: 'easeInOut', delay: 1.5 },
-              rotate:  { duration: 5.8, repeat: Infinity, ease: 'easeInOut' },
-            }}
-            className="absolute right-0 top-[42%] -translate-y-1/2 z-20 bg-white/[0.04] backdrop-blur-xl border border-white/[0.1] px-4 py-3 rounded-2xl flex items-center gap-3 shadow-2xl"
-          >
-            <div className="w-9 h-9 rounded-xl bg-sky-500/15 flex items-center justify-center text-sky-400 flex-shrink-0">
-              <motion.div animate={{ rotate: 360 }} transition={{ duration: 8, repeat: Infinity, ease: 'linear' }}>
-                <RiSparklingLine size={17} />
-              </motion.div>
-            </div>
-            <div>
-              <p className="text-[9px] font-bold tracking-widest text-white/40 uppercase">PREMIUM CUT</p>
-              <p className="text-white text-xs font-semibold mt-0.5">Custom Drape & Fit</p>
-            </div>
-          </motion.div>
+          {/* Bottom-right secondary floating image */}
+          <div className="absolute -bottom-16 -right-12 w-48 h-64 rounded-xl overflow-hidden border border-text-primary/10 dark:border-white/10 shadow-2xl z-10 hidden lg:block transition-all duration-500 hover:translate-y-2">
+            <img className="w-full h-full object-cover" src={detailImg} alt="Premium stacked tshirts fabric folded" />
+          </div>
 
         </div>
       </div>
 
-      {/* ═══════════ SCROLL CUE ═══════════ */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 2, duration: 1 }}
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-2 pointer-events-none"
-      >
-        <span className="text-[9px] font-bold tracking-[0.3em] uppercase text-white/20">Scroll</span>
-        <motion.div
-          animate={{ y: [0, 8, 0] }}
-          transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
-          className="w-[1px] h-8 bg-gradient-to-b from-white/30 to-transparent"
-        />
-      </motion.div>
+      {/* ═══════════ SCROLLING MARQUEE ═══════════ */}
+      <div className="absolute bottom-0 w-full py-6 overflow-hidden bg-bg-secondary/40 border-t border-text-primary/10 dark:border-white/10 whitespace-nowrap z-20 backdrop-blur-sm transition-colors duration-300">
+        <div className="inline-flex gap-16 animate-marquee">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="inline-flex items-center gap-16">
+              <span className="font-display font-black text-2xl sm:text-3xl uppercase italic tracking-tighter text-text-muted/20">DROP 02 LIVE NOW</span>
+              <span className="font-display font-black text-2xl sm:text-3xl uppercase italic tracking-tighter text-text-muted/20">•</span>
+              <span className="font-display font-black text-2xl sm:text-3xl uppercase italic tracking-tighter text-text-muted/20">LIMITED STOCK</span>
+              <span className="font-display font-black text-2xl sm:text-3xl uppercase italic tracking-tighter text-text-muted/20">•</span>
+              <span className="font-display font-black text-2xl sm:text-3xl uppercase italic tracking-tighter text-text-muted/20">EXCLUSIVE RELEASE</span>
+              <span className="font-display font-black text-2xl sm:text-3xl uppercase italic tracking-tighter text-text-muted/20">•</span>
+            </div>
+          ))}
+        </div>
+      </div>
     </section>
   );
 }

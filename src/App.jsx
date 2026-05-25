@@ -67,13 +67,19 @@ function MaintenancePage({ storeName }) {
 
 function AppContent() {
   const [cartOpen, setCartOpen] = useState(false);
-  const [darkMode, setDarkMode] = useState(true);
+  const [darkMode, setDarkMode] = useState(() => {
+    const saved = localStorage.getItem('luxe_dark_mode');
+    return saved !== null ? JSON.parse(saved) : true;
+  });
   const location = useLocation();
   const isAdminRoute = location.pathname.startsWith('/admin');
   const { settings } = useSettings();
   const { isAdmin } = useAuth() || {};
 
-  useEffect(() => { document.documentElement.classList.toggle('dark', darkMode); }, [darkMode]);
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', darkMode);
+    localStorage.setItem('luxe_dark_mode', JSON.stringify(darkMode));
+  }, [darkMode]);
   useEffect(() => { setCartOpen(false); }, [location]);
 
   useEffect(() => {
