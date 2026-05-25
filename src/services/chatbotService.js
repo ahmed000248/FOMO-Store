@@ -1,102 +1,96 @@
-/**
- * Chatbot Service
- * 
- * Manages Chatbot conversation history logs, session storage persistence,
- * starter prompts, and triggers.
- */
 import { generateStylistResponse } from './aiService';
 
-const CHAT_SESSION_KEY = 'fomo_stylist_chat';
+const SESSION_KEY = 'nova_chat_history';
 
-// Default welcome introduction block
 export const DEFAULT_WELCOME = {
   id: 'welcome',
   sender: 'stylist',
-  text: "Yo, I'm your FOMO AI Personal Stylist. Let's get your fit locked in. Ask me anything about our silhouettes, winter drops, minimal street layering, or what goes hard with your favorite cargos. If you know, you know.",
+  text: "Hi there! I'm Nova, your AI shopping assistant. I can help you find the perfect outfit, check what's in stock, or answer questions about shipping and returns. What are you looking for today?",
   recommendedProducts: [],
-  timestamp: new Date().toISOString()
+  timestamp: new Date().toISOString(),
 };
 
-// Curated starter prompt questions
 export const STARTER_PROMPTS = [
-  "What's trending right now?",
-  "Suggest a minimal clean fit",
-  "What should I wear with a hoodie?",
-  "Winter streetwear layers"
+  'Show me new arrivals',
+  "What's on sale?",
+  'Help me find a jacket',
+  'Shipping & return info',
 ];
 
-/**
- * Loads conversation logs from sessionStorage.
- */
 export const loadChatHistory = () => {
   try {
-    const history = sessionStorage.getItem(CHAT_SESSION_KEY);
-    return history ? JSON.parse(history) : [DEFAULT_WELCOME];
-  } catch (err) {
-    console.warn("Failed to load chat history", err);
+    const saved = sessionStorage.getItem(SESSION_KEY);
+    return saved ? JSON.parse(saved) : [DEFAULT_WELCOME];
+  } catch {
     return [DEFAULT_WELCOME];
   }
 };
 
-/**
- * Saves conversation logs to sessionStorage.
- */
 export const saveChatHistory = (history) => {
   try {
-    sessionStorage.setItem(CHAT_SESSION_KEY, JSON.stringify(history));
-  } catch (err) {
-    console.warn("Failed to save chat history", err);
+    sessionStorage.setItem(SESSION_KEY, JSON.stringify(history));
+  } catch (e) {
+    console.warn('Failed to save chat history:', e);
   }
 };
 
-/**
- * Handles sending a message. Updates conversation history and streams the response.
- */
-export const sendMessageToStylist = async (messageText, currentHistory, productsList = []) => {
-  if (!messageText.trim()) return currentHistory;
+export const clearChatHistory = () => {
+  sessionStorage.removeItem(SESSION_KEY);
+};
 
-  // 1. Append user message
+export const sendMessageToStylist = async (
+  messageText,
+  currentHistory,
+  productsList = [],
+  settings = null,
+) => {
+  if (!messageText.trim()) return { history: currentHistory, promise: Promise.resolve(currentHistory) };
+
   const userMsg = {
     id: `user-${Date.now()}`,
     sender: 'user',
     text: messageText,
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   };
-  
+
   const updatedHistory = [...currentHistory, userMsg];
   saveChatHistory(updatedHistory);
 
-  // 2. Return with updated list so the UI shows the user bubble immediately
   return {
     history: updatedHistory,
     promise: (async () => {
       try {
-        const aiResponse = await generateStylistResponse(messageText, productsList);
-        
+        // Pass full conversation history so Gemini has context memory
+        const aiResponse = await generateStylistResponse(
+          messageText,
+          updatedHistory,
+          productsList,
+          settings,
+        );
+
         const stylistMsg = {
           id: `stylist-${Date.now()}`,
           sender: 'stylist',
           text: aiResponse.text,
           recommendedProducts: aiResponse.recommendedProducts || [],
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         };
 
         const finalHistory = [...updatedHistory, stylistMsg];
         saveChatHistory(finalHistory);
         return finalHistory;
       } catch (err) {
-        // Safe UI error fallback
         const errMsg = {
           id: `error-${Date.now()}`,
           sender: 'stylist',
-          text: "My styling feeds are running hot right now. Give me a second to clear the threads, or try asking again. Peace.",
+          text: "I'm having a little trouble connecting right now. Please try again in a moment, or feel free to browse our products!",
           recommendedProducts: [],
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         };
         const finalHistory = [...updatedHistory, errMsg];
         saveChatHistory(finalHistory);
         return finalHistory;
       }
-    })()
+    })(),
   };
 };
