@@ -1,11 +1,11 @@
 // ─── Product Detail Page — Firebase-backed ───────────────────────────────────
-import React, { useState, lazy, Suspense } from 'react';
+import React, { useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   RiHeartLine, RiHeartFill, RiShoppingBagLine, RiCheckLine,
   RiStarFill, RiTruckLine, RiRefreshLine, RiShieldCheckLine,
-  RiAddLine, RiSubtractLine, RiPulseLine, RiImage2Line, RiCompass3Line
+  RiAddLine, RiSubtractLine, RiPulseLine
 } from 'react-icons/ri';
 import { useCart } from '../context/useCart';
 import { useWishlist } from '../context/useWishlist';
@@ -20,8 +20,6 @@ import { ProductReviews } from '../components/ui/ReviewSystem';
 import { useRecommendations } from '../hooks/useRecommendations';
 import AIRecommendations from '../components/ui/AIRecommendations';
 
-// 3D viewer — lazy loaded only when user switches to 3D tab
-const Product3D = lazy(() => import('../components/Product3D'));
 import { useProductViews } from '../hooks/useProductViews';
 import { trackEvent } from '../services/analyticsService';
 
@@ -57,9 +55,6 @@ export default function ProductDetail() {
   const [addedToCart,   setAddedToCart]   = useState(false);
   const [zoomPos,       setZoomPos]       = useState({ x: 50, y: 50 });
   const [isZoomed,      setIsZoomed]      = useState(false);
-  
-  // Toggle between 2D Images and 3D Studio canvas
-  const [viewMode, setViewMode] = useState('2d'); 
 
   const { addToCart }        = useCart();
   const { toggle, isInWishlist } = useWishlist();
@@ -142,116 +137,56 @@ export default function ProductDetail() {
           {/* ═══════════ GALLERY CONTAINER ═══════════ */}
           <div className="space-y-6">
             
-            {/* 2D / 3D SWITCH BAR */}
-            <div className="flex items-center justify-between glass border border-white/5 p-1.5 rounded-2xl bg-slate-950/20 backdrop-blur-md">
-              <span className="text-[10px] font-bold tracking-widest text-white/50 uppercase pl-3">Showcase Mode</span>
-              <div className="flex gap-1">
-                <button
-                  onClick={() => setViewMode('2d')}
-                  className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                    viewMode === '2d' 
-                      ? 'bg-gradient-to-r from-accent-violet to-accent-sky text-white shadow-md' 
-                      : 'text-white/60 hover:text-white hover:bg-white/5'
-                  }`}
-                >
-                  <RiImage2Line size={14} />
-                  2D Cinematic
-                </button>
-                <button
-                  onClick={() => setViewMode('3d')}
-                  className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                    viewMode === '3d' 
-                      ? 'bg-gradient-to-r from-accent-violet to-accent-sky text-white shadow-md' 
-                      : 'text-white/60 hover:text-white hover:bg-white/5'
-                  }`}
-                >
-                  <RiCompass3Line size={14} />
-                  3D Interactive
-                </button>
-              </div>
-            </div>
+            {/* GALLERY */}
+            <div className="space-y-4">
+              {(() => {
+                const displayImages = [...(product.images && product.images.length > 0 ? product.images : [product.image])];
+                while (displayImages.length < 5) {
+                  displayImages.push(product.image);
+                }
+                const activeImg = displayImages[selectedImage] || product.image;
 
-            {/* VIEWER DISPLAY SWITCHBOARD */}
-            <AnimatePresence mode="wait">
-              {viewMode === '3d' ? (
-                <motion.div
-                  key="3d-viewer"
-                  initial={{ opacity: 0, scale: 0.98 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.98 }}
-                  transition={{ duration: 0.35 }}
-                >
-                  <Suspense fallback={
-                    <div className="h-[500px] flex items-center justify-center glass rounded-3xl border border-white/5">
-                      <div className="text-center space-y-3">
-                        <div className="w-10 h-10 rounded-full border-2 border-accent-violet/30 border-t-accent-violet animate-spin mx-auto" />
-                        <p className="text-text-muted text-sm">Loading 3D Studio…</p>
-                      </div>
-                    </div>
-                  }>
-                    <Product3D product={product} />
-                  </Suspense>
-                </motion.div>
-              ) : (
-                <motion.div
-                  key="2d-gallery"
-                  initial={{ opacity: 0, scale: 0.98 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.98 }}
-                  transition={{ duration: 0.35 }}
-                  className="space-y-4"
-                >
-                  {(() => {
-                    const displayImages = [...(product.images && product.images.length > 0 ? product.images : [product.image])];
-                    while (displayImages.length < 5) {
-                      displayImages.push(product.image);
-                    }
-                    const activeImg = displayImages[selectedImage] || product.image;
-
-                    return (
-                      <>
-                        <motion.div
-                          className="relative overflow-hidden rounded-3xl bg-bg-surface aspect-[4/5] cursor-zoom-in border border-white/5 shadow-2xl"
-                          onMouseMove={handleMouseMove}
-                          onMouseEnter={() => setIsZoomed(true)}
-                          onMouseLeave={() => setIsZoomed(false)}
-                        >
-                          <motion.img
-                            key={selectedImage}
-                            src={activeImg}
-                            alt={product.name}
-                            className="w-full h-full object-cover"
-                            initial={{ opacity: 0, scale: 1.05 }}
-                            animate={{ opacity: 1, scale: isZoomed ? 1.18 : 1 }}
-                            style={isZoomed ? { transformOrigin: `${zoomPos.x}% ${zoomPos.y}%` } : {}}
-                            transition={{ duration: isZoomed ? 0.1 : 0.4 }}
-                          />
-                          {product.badge && (
-                            <div className={`absolute top-4 left-4 px-3.5 py-1.5 rounded-full text-[10px] uppercase font-bold tracking-widest border shadow-sm ${
-                              product.badge === 'New'      ? 'bg-accent-violet/20 text-accent-violet border-accent-violet/30' :
-                              product.badge === 'Sale'     ? 'bg-accent-rose/20   text-accent-rose   border-accent-rose/30'   :
-                                                             'bg-accent-amber/20  text-accent-amber  border-accent-amber/30'
-                            }`}>
-                              {product.badge}{discount && product.badge === 'Sale' ? ` −${discount}%` : ''}
-                            </div>
-                          )}
-                        </motion.div>
-                        
-                        {/* Exactly 5 angle images below the main display */}
-                        <div className="grid grid-cols-5 gap-3">
-                          {displayImages.slice(0, 5).map((img, i) => (
-                            <motion.button key={i} whileHover={{ scale: 1.06 }} onClick={() => setSelectedImage(i)}
-                              className={`relative overflow-hidden rounded-2xl aspect-square w-full border-2 transition-all cursor-pointer ${selectedImage === i ? 'border-accent-violet shadow-[0_0_15px_rgba(139,92,246,0.3)] scale-[1.02]' : 'border-white/10'}`}>
-                              <img src={img} alt="" className="w-full h-full object-cover" />
-                            </motion.button>
-                          ))}
+                return (
+                  <>
+                    <motion.div
+                      className="relative overflow-hidden rounded-3xl bg-bg-surface aspect-[4/5] cursor-zoom-in border border-white/5 shadow-2xl"
+                      onMouseMove={handleMouseMove}
+                      onMouseEnter={() => setIsZoomed(true)}
+                      onMouseLeave={() => setIsZoomed(false)}
+                    >
+                      <motion.img
+                        key={selectedImage}
+                        src={activeImg}
+                        alt={product.name}
+                        className="w-full h-full object-cover"
+                        initial={{ opacity: 0, scale: 1.05 }}
+                        animate={{ opacity: 1, scale: isZoomed ? 1.18 : 1 }}
+                        style={isZoomed ? { transformOrigin: `${zoomPos.x}% ${zoomPos.y}%` } : {}}
+                        transition={{ duration: isZoomed ? 0.1 : 0.4 }}
+                      />
+                      {product.badge && (
+                        <div className={`absolute top-4 left-4 px-3.5 py-1.5 rounded-full text-[10px] uppercase font-bold tracking-widest border shadow-sm ${
+                          product.badge === 'New'      ? 'bg-accent-violet/20 text-accent-violet border-accent-violet/30' :
+                          product.badge === 'Sale'     ? 'bg-accent-rose/20   text-accent-rose   border-accent-rose/30'   :
+                                                         'bg-accent-amber/20  text-accent-amber  border-accent-amber/30'
+                        }`}>
+                          {product.badge}{discount && product.badge === 'Sale' ? ` −${discount}%` : ''}
                         </div>
-                      </>
-                    );
-                  })()}
-                </motion.div>
-              )}
-            </AnimatePresence>
+                      )}
+                    </motion.div>
+
+                    <div className="grid grid-cols-5 gap-3">
+                      {displayImages.slice(0, 5).map((img, i) => (
+                        <motion.button key={i} whileHover={{ scale: 1.06 }} onClick={() => setSelectedImage(i)}
+                          className={`relative overflow-hidden rounded-2xl aspect-square w-full border-2 transition-all cursor-pointer ${selectedImage === i ? 'border-accent-violet shadow-[0_0_15px_rgba(139,92,246,0.3)] scale-[1.02]' : 'border-white/10'}`}>
+                          <img src={img} alt="" className="w-full h-full object-cover" />
+                        </motion.button>
+                      ))}
+                    </div>
+                  </>
+                );
+              })()}
+            </div>
           </div>
 
           {/* ═══════════ DETAILS & SPECS INFO ═══════════ */}
