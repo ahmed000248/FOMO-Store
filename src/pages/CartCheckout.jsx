@@ -113,7 +113,7 @@ export function Cart() {
 
 // ─── Wishlist Page ────────────────────────────────────────────────────────────
 export function Wishlist() {
-  const { items } = useWishlist();
+  const { wishlistItems: items } = useWishlist();
   return (
     <main className="pt-28 pb-20 min-h-screen">
       <SEO title="Wishlist" description="Your saved premium fashion items." />
