@@ -10,7 +10,7 @@
  * 
  * Integrates directly with Firestore (collection: 'analytics') with robust sandboxed offline fallbacks.
  */
-import { db } from '../firebase/config';
+import { db, auth } from '../firebase/config';
 import { collection, addDoc, serverTimestamp, getDocs, query, limit } from 'firebase/firestore';
 
 const isFirebaseConfigured = () => {
@@ -54,12 +54,13 @@ export const trackEvent = async (eventType, metadata = {}) => {
     })()
   };
 
-  // 1. If Firebase is active, record in Firestore
-  if (isFirebaseConfigured() && db) {
+  // 1. If Firebase is active and user is authenticated, record in Firestore
+  if (isFirebaseConfigured() && db && auth.currentUser) {
     try {
       const analyticsCollection = collection(db, 'analytics');
       await addDoc(analyticsCollection, {
         ...eventPayload,
+        userId: auth.currentUser.uid, // associate with user
         timestamp: serverTimestamp() // use server side accurate timestamp
       });
       return;

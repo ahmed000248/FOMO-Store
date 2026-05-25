@@ -1,20 +1,38 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    // Helper functions
     function isAuth()  { return request.auth != null; }
-    function isAdmin() { return isAuth() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'; }
+    function isAdmin() { return isAuth() && request.auth.token.admin == true; }
+    function isOwner(uid) { return isAuth() && request.auth.uid == uid; }
 
-    match /products/{id}   { allow read: if true; allow write: if isAdmin(); }
-    match /users/{uid}     { allow read, write: if request.auth.uid == uid || isAdmin(); }
-    match /carts/{uid}     { allow read, write: if request.auth.uid == uid; }
-    match /wishlists/{uid} { allow read, write: if request.auth.uid == uid; }
+    // Products collection: deny unauthenticated read/write
+    match /products/{id}   { allow read: if isAuth(); allow write: if isAdmin(); }
+    
+    // Users collection: admins can read/write/count all; users can read/write only their own document
+    match /users/{uid}     { allow read, write: if isOwner(uid) || isAdmin(); }
+    
+    // Carts & Wishlists: only owner access
+    match /carts/{uid}     { allow read, write: if isOwner(uid); }
+    match /wishlists/{uid} { allow read, write: if isOwner(uid); }
+    
+    // Orders collection: admins can count/read/write all; users can read/write only their own orders
     match /orders/{id}     { 
-      allow read: if isAuth() && (resource.data.uid == request.auth.uid || isAdmin()); 
-      allow create: if isAuth();
-      allow update, delete: if isAdmin(); 
+      allow read: if isAdmin() || (isAuth() && resource.data.uid == request.auth.uid); 
+      allow create: if isAuth() && request.resource.data.uid == request.auth.uid;
+      allow update, delete: if isAdmin() || (isAuth() && resource.data.uid == request.auth.uid); 
     }
-    match /reviews/{id}    { allow read: if true; allow create: if isAuth(); allow update, delete: if isAdmin(); }
-    match /settings/{id}   { allow read: if true; allow write: if isAdmin(); }
-    match /newsletter/{id} { allow create: if true; allow read: if isAdmin(); }
+    
+    // Reviews: deny unauthenticated read
+    match /reviews/{id}    { allow read: if isAuth(); allow create: if isAuth(); allow update, delete: if isAdmin(); }
+    
+    // Settings: deny unauthenticated read
+    match /settings/{id}   { allow read: if isAuth(); allow write: if isAdmin(); }
+    
+    // Newsletter: authenticated users can subscribe, only admins can manage
+    match /newsletter/{id} { allow create: if isAuth(); allow read, update, delete: if isAdmin(); }
+
+    // Analytics: authenticated users can CREATE events, only admins can read or modify them
+    match /analytics/{id}  { allow create: if isAuth(); allow read, update, delete: if isAdmin(); }
   }
 }
