@@ -12,6 +12,7 @@ import Footer from './components/layout/Footer';
 import CartDrawer from './components/cart/CartDrawer';
 import { ScrollProgress, BackToTop } from './components/ui/ScrollProgress';
 import { RiWhatsappLine } from 'react-icons/ri';
+import AIChatbotStylist from './components/ui/AIChatbotStylist';
 
 // Pages
 import Home from './pages/Home';
@@ -151,6 +152,7 @@ function AppContent() {
           <RiWhatsappLine size={28} />
         </a>
       )}
+      <AIChatbotStylist />
       <Toaster position="bottom-right" toastOptions={{
         duration: 3000,
         style: { background: '#1e293b', color: '#f8fafc', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '16px', fontSize: '14px' },

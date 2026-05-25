@@ -18,6 +18,8 @@ import ProductCard from '../components/ui/ProductCard';
 import SEO from '../components/ui/SEO';
 import { ProductDetailSkeleton } from '../components/ui/skeletons/Skeletons';
 import { ProductReviews } from '../components/ui/ReviewSystem';
+import { useRecommendations } from '../hooks/useRecommendations';
+import AIRecommendations from '../components/ui/AIRecommendations';
 
 const tabs = ['Product Details', 'Rating & Reviews', 'FAQs'];
 
@@ -25,17 +27,14 @@ export default function ProductDetail() {
   const { id }     = useParams();
   const navigate   = useNavigate();
   const { product, loading } = useProduct(id);
-  const { products: allProducts } = useProducts({});
   const { recentlyViewed, addRecentlyViewed } = useRecentlyViewed();
   
-  // Smart Recommendations: Same category first, then fallback
-  const relatedProducts = React.useMemo(() => {
-    if (!product) return [];
-    const others = allProducts.filter(p => String(p.id) !== String(id));
-    const sameCategory = others.filter(p => p.category === product.category);
-    const mixed = [...sameCategory, ...others.filter(p => p.category !== product.category)];
-    return mixed.slice(0, 4);
-  }, [allProducts, product, id]);
+  const {
+    loading: recsLoading,
+    styledForYou,
+    completeTheFit,
+    recommendedEssentials
+  } = useRecommendations(product);
 
   React.useEffect(() => {
     if (product) {
@@ -294,27 +293,14 @@ export default function ProductDetail() {
           )}
         </div>
 
-        {/* Related */}
-        {relatedProducts.length > 0 && (
-          <div className="mb-20">
-            <p className="text-accent-violet text-sm font-semibold tracking-[0.2em] uppercase mb-2">More to Explore</p>
-            <h2 className="font-display text-3xl font-bold text-text-primary mb-8">You Might Also <span className="gradient-text italic">Like</span></h2>
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-              {relatedProducts.map((p, i) => <ProductCard key={p.id} product={p} index={i} />)}
-            </div>
-          </div>
-        )}
-
-        {/* Recently Viewed */}
-        {recentlyViewed.filter(p => String(p.id) !== String(id)).length > 0 && (
-          <div>
-            <p className="text-accent-violet text-sm font-semibold tracking-[0.2em] uppercase mb-2">Your History</p>
-            <h2 className="font-display text-3xl font-bold text-text-primary mb-8">Recently <span className="gradient-text italic">Viewed</span></h2>
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-              {recentlyViewed.filter(p => String(p.id) !== String(id)).slice(0, 4).map((p, i) => <ProductCard key={p.id} product={p} index={i} />)}
-            </div>
-          </div>
-        )}
+        {/* AI Recommendations & Outfitting Engine */}
+        <AIRecommendations
+          currentProduct={product}
+          loading={recsLoading}
+          styledForYou={styledForYou}
+          completeTheFit={completeTheFit}
+          recommendedEssentials={recommendedEssentials}
+        />
       </div>
     </main>
   );
