@@ -3,32 +3,36 @@ service cloud.firestore {
   match /databases/{database}/documents {
     // Helper functions
     function isAuth()  { return request.auth != null; }
-    function isAdmin() { return isAuth() && request.auth.token.admin == true; }
+    function isAdmin() {
+      return isAuth() &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
     function isOwner(uid) { return isAuth() && request.auth.uid == uid; }
 
-    // Products collection: deny unauthenticated read/write
-    match /products/{id}   { allow read: if isAuth(); allow write: if isAdmin(); }
-    
-    // Users collection: admins can read/write/count all; users can read/write only their own document
+    // Products: publicly readable (e-commerce browsing without login)
+    match /products/{id}   { allow read: if true; allow write: if isAdmin(); }
+
+    // Users: only owner or admin can read/write individual docs; no public listing
     match /users/{uid}     { allow read, write: if isOwner(uid) || isAdmin(); }
-    
+
     // Carts & Wishlists: only owner access
     match /carts/{uid}     { allow read, write: if isOwner(uid); }
     match /wishlists/{uid} { allow read, write: if isOwner(uid); }
-    
-    // Orders collection: admins can count/read/write all; users can read/write only their own orders
-    match /orders/{id}     { 
-      allow read: if isAdmin() || (isAuth() && resource.data.uid == request.auth.uid); 
+
+    // Orders: admin can read/write all; users can only access their own orders
+    match /orders/{id}     {
+      allow read: if isAdmin() || (isAuth() && resource.data.uid == request.auth.uid);
       allow create: if isAuth() && request.resource.data.uid == request.auth.uid;
-      allow update, delete: if isAdmin() || (isAuth() && resource.data.uid == request.auth.uid); 
+      allow update, delete: if isAdmin() || (isAuth() && resource.data.uid == request.auth.uid);
     }
-    
-    // Reviews: deny unauthenticated read
-    match /reviews/{id}    { allow read: if isAuth(); allow create: if isAuth(); allow update, delete: if isAdmin(); }
-    
-    // Settings: deny unauthenticated read
-    match /settings/{id}   { allow read: if isAuth(); allow write: if isAdmin(); }
-    
+
+    // Reviews: publicly readable (social proof for anonymous visitors)
+    match /reviews/{id}    { allow read: if true; allow create: if isAuth(); allow update, delete: if isAdmin(); }
+
+    // Settings: publicStats doc is world-readable for homepage stats; other docs require auth
+    match /settings/{id}   { allow read: if id == 'publicStats' || isAuth(); allow write: if isAdmin(); }
+
     // Newsletter: authenticated users can subscribe, only admins can manage
     match /newsletter/{id} { allow create: if isAuth(); allow read, update, delete: if isAdmin(); }
 

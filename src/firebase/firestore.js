@@ -225,16 +225,18 @@ export const seedProducts = async (products) => {
 
 export const getHomepageCounts = async () => {
   try {
-    const [productSnap, orderSnap, userSnap, reviewSnap] = await Promise.all([
+    // products and reviews are publicly readable; user/order counts come from
+    // the publicly-readable settings/publicStats document (maintained by admin dashboard)
+    const [productSnap, reviewSnap, statsSnap] = await Promise.all([
       getCountFromServer(collection(db, 'products')),
-      getCountFromServer(collection(db, 'orders')),
-      getCountFromServer(collection(db, 'users')),
       getCountFromServer(collection(db, 'reviews')),
+      getDoc(doc(db, 'settings', 'publicStats')),
     ]);
+    const cached = statsSnap.exists() ? statsSnap.data() : {};
     return {
       productCount: productSnap.data().count,
-      orderCount:   orderSnap.data().count,
-      userCount:    userSnap.data().count,
+      orderCount:   cached.orderCount   ?? 0,
+      userCount:    cached.userCount    ?? 0,
       reviewCount:  reviewSnap.data().count,
     };
   } catch {
@@ -357,17 +359,28 @@ export const subscribeAdminStats = (callback) =>
           getCountFromServer(collection(db, 'users')),
         ]);
 
+        const totalProducts = productSnap.data().count;
+        const totalUsers    = userSnap.data().count;
+        const totalOrders   = orders.length;
+
+        // Keep the publicly-readable stats doc in sync for the homepage
+        setDoc(doc(db, 'settings', 'publicStats'), {
+          userCount:  totalUsers,
+          orderCount: totalOrders,
+          updatedAt:  serverTimestamp(),
+        }, { merge: true }).catch(() => {});
+
         // Daily visits
         const today = new Date().toISOString().split('T')[0];
         const visitSnap = await getDoc(doc(db, 'analytics', `visits_${today}`));
         const todayVisits = visitSnap.exists() ? visitSnap.data().count : 0;
 
         callback({
-          totalOrders:    orders.length,
+          totalOrders,
           totalRevenue:   revenue,
-          totalProducts:  productSnap.data().count,
-          totalUsers:     userSnap.data().count,
-          todayVisits:    todayVisits,
+          totalProducts,
+          totalUsers,
+          todayVisits,
           pendingOrders:  pending,
           deliveredOrders: delivered,
           processingOrders: processing,
