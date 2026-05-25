@@ -1,32 +1,17 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Toaster } from 'react-hot-toast';
 import { useSettings } from './context/SettingsContext';
 import { useAuth } from './context/AuthContext';
 import { logSiteVisit } from './firebase/firestore';
+import { RiWhatsappLine } from 'react-icons/ri';
 
-// Layout
+// Layout shell — always in the initial bundle
 import Navbar from './components/layout/Navbar';
 import Footer from './components/layout/Footer';
 import CartDrawer from './components/cart/CartDrawer';
 import { ScrollProgress, BackToTop } from './components/ui/ScrollProgress';
-import { RiWhatsappLine } from 'react-icons/ri';
-import AIChatbotStylist from './components/ui/AIChatbotStylist';
-
-// Pages
-import Home from './pages/Home';
-import Products from './pages/Products';
-import ProductDetail from './pages/ProductDetail';
-import { Cart, Wishlist, Checkout } from './pages/CartCheckout';
-import { Login, About, Contact, Orders } from './pages/OtherPages';
-
-// Admin
-import AdminLayout from './admin/AdminLayout';
-import AdminOverview from './admin/AdminOverview';
-import AdminProducts from './admin/AdminProducts';
-import { AdminOrders, AdminCustomers } from './admin/AdminOrdersCustomers';
-import AdminSettings from './admin/AdminSettings';
 
 // Contexts
 import { AuthProvider } from './context/AuthContext';
@@ -35,7 +20,41 @@ import { WishlistProvider } from './context/WishlistContext';
 import { SettingsProvider } from './context/SettingsContext';
 
 // Guards
-import { ProtectedRoute, AdminRoute, GuestRoute, LoadingScreen } from './components/auth/ProtectedRoute';
+import { ProtectedRoute, AdminRoute, GuestRoute } from './components/auth/ProtectedRoute';
+
+// ─── Lazy-loaded pages ────────────────────────────────────────────────────────
+const Home          = lazy(() => import('./pages/Home'));
+const Products      = lazy(() => import('./pages/Products'));
+const ProductDetail = lazy(() => import('./pages/ProductDetail'));
+
+// Named exports wrapped so lazy() gets a default export
+const Cart     = lazy(() => import('./pages/CartCheckout').then(m => ({ default: m.Cart })));
+const Wishlist = lazy(() => import('./pages/CartCheckout').then(m => ({ default: m.Wishlist })));
+const Checkout = lazy(() => import('./pages/CartCheckout').then(m => ({ default: m.Checkout })));
+const Login    = lazy(() => import('./pages/OtherPages').then(m => ({ default: m.Login })));
+const About    = lazy(() => import('./pages/OtherPages').then(m => ({ default: m.About })));
+const Contact  = lazy(() => import('./pages/OtherPages').then(m => ({ default: m.Contact })));
+const Orders   = lazy(() => import('./pages/OtherPages').then(m => ({ default: m.Orders })));
+
+// ─── Lazy-loaded admin (never downloaded by regular users) ────────────────────
+const AdminLayout    = lazy(() => import('./admin/AdminLayout'));
+const AdminOverview  = lazy(() => import('./admin/AdminOverview'));
+const AdminProducts  = lazy(() => import('./admin/AdminProducts'));
+const AdminOrders    = lazy(() => import('./admin/AdminOrdersCustomers').then(m => ({ default: m.AdminOrders })));
+const AdminCustomers = lazy(() => import('./admin/AdminOrdersCustomers').then(m => ({ default: m.AdminCustomers })));
+const AdminSettings  = lazy(() => import('./admin/AdminSettings'));
+
+// ─── Floating widget — deferred after first paint ────────────────────────────
+const AIChatbotStylist = lazy(() => import('./components/ui/AIChatbotStylist'));
+
+// Minimal inline spinner used as Suspense fallback
+function PageLoader() {
+  return (
+    <div className="min-h-[60vh] flex items-center justify-center">
+      <div className="w-8 h-8 rounded-full border-2 border-accent-violet/30 border-t-accent-violet animate-spin" />
+    </div>
+  );
+}
 
 function PageTransition({ children }) {
   const location = useLocation();
@@ -96,15 +115,17 @@ function AppContent() {
 
   if (isAdminRoute) {
     return (
-      <Routes>
-        <Route path="/admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>
-          <Route index    element={<AdminOverview />} />
-          <Route path="products"  element={<AdminProducts />} />
-          <Route path="orders"    element={<AdminOrders />} />
-          <Route path="customers" element={<AdminCustomers />} />
-          <Route path="settings"  element={<AdminSettings />} />
-        </Route>
-      </Routes>
+      <Suspense fallback={<PageLoader />}>
+        <Routes>
+          <Route path="/admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>
+            <Route index          element={<AdminOverview />} />
+            <Route path="products"  element={<AdminProducts />} />
+            <Route path="orders"    element={<AdminOrders />} />
+            <Route path="customers" element={<AdminCustomers />} />
+            <Route path="settings"  element={<AdminSettings />} />
+          </Route>
+        </Routes>
+      </Suspense>
     );
   }
 
@@ -113,30 +134,31 @@ function AppContent() {
       <ScrollProgress />
       <Navbar darkMode={darkMode} toggleDark={() => setDarkMode(!darkMode)} onCartOpen={() => setCartOpen(true)} />
       <PageTransition>
-        <Routes location={location} key={location.pathname}>
-          <Route path="/"              element={<Home />} />
-          <Route path="/products"      element={<Products />} />
-          <Route path="/products/:id"  element={<ProductDetail />} />
-          <Route path="/about"         element={<About />} />
-          <Route path="/contact"       element={<Contact />} />
-          <Route path="/login"         element={<GuestRoute><Login /></GuestRoute>} />
+        <Suspense fallback={<PageLoader />}>
+          <Routes location={location} key={location.pathname}>
+            <Route path="/"              element={<Home />} />
+            <Route path="/products"      element={<Products />} />
+            <Route path="/products/:id"  element={<ProductDetail />} />
+            <Route path="/about"         element={<About />} />
+            <Route path="/contact"       element={<Contact />} />
+            <Route path="/login"         element={<GuestRoute><Login /></GuestRoute>} />
 
-          {/* Protected routes */}
-          <Route path="/cart"      element={<ProtectedRoute><Cart /></ProtectedRoute>} />
-          <Route path="/wishlist"  element={<ProtectedRoute><Wishlist /></ProtectedRoute>} />
-          <Route path="/checkout"  element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
-          <Route path="/orders"    element={<ProtectedRoute><Orders /></ProtectedRoute>} />
+            <Route path="/cart"      element={<ProtectedRoute><Cart /></ProtectedRoute>} />
+            <Route path="/wishlist"  element={<ProtectedRoute><Wishlist /></ProtectedRoute>} />
+            <Route path="/checkout"  element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
+            <Route path="/orders"    element={<ProtectedRoute><Orders /></ProtectedRoute>} />
 
-          <Route path="*" element={
-            <main className="pt-28 min-h-screen flex items-center justify-center">
-              <div className="text-center">
-                <p className="text-8xl font-display font-bold gradient-text mb-4">404</p>
-                <p className="text-text-muted mb-6">Page not found.</p>
-                <a href="/" className="btn-primary text-white">Go Home</a>
-              </div>
-            </main>
-          } />
-        </Routes>
+            <Route path="*" element={
+              <main className="pt-28 min-h-screen flex items-center justify-center">
+                <div className="text-center">
+                  <p className="text-8xl font-display font-bold gradient-text mb-4">404</p>
+                  <p className="text-text-muted mb-6">Page not found.</p>
+                  <a href="/" className="btn-primary text-white">Go Home</a>
+                </div>
+              </main>
+            } />
+          </Routes>
+        </Suspense>
       </PageTransition>
       <Footer />
       <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />
@@ -152,7 +174,9 @@ function AppContent() {
           <RiWhatsappLine size={28} />
         </a>
       )}
-      <AIChatbotStylist />
+      <Suspense fallback={null}>
+        <AIChatbotStylist />
+      </Suspense>
       <Toaster position="bottom-right" toastOptions={{
         duration: 3000,
         style: { background: '#1e293b', color: '#f8fafc', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '16px', fontSize: '14px' },

@@ -11,7 +11,6 @@ export default defineConfig({
     },
   },
 
-  // Pre-bundle heavy deps so dev server doesn't re-transform them on every request
   optimizeDeps: {
     include: [
       'react',
@@ -22,25 +21,50 @@ export default defineConfig({
       'firebase/auth',
       'firebase/firestore',
       'firebase/storage',
-      '@react-three/fiber',
-      '@react-three/drei',
-      'three',
       'zustand',
       'react-hot-toast',
-      'react-icons/ri',
     ],
+    // 3D libs excluded — lazy loaded on demand, no need to pre-bundle
+    exclude: ['@react-three/fiber', '@react-three/drei', 'three'],
   },
 
   build: {
-    chunkSizeWarningLimit: 1000,
+    // vendor-3d (Three.js) is ~1 MB but lazy-loaded on demand — not a true initial-load problem
+    chunkSizeWarningLimit: 1100,
     rollupOptions: {
       output: {
         manualChunks(id) {
-          if (id.includes('firebase'))                               return 'vendor-firebase';
-          if (id.includes('framer-motion') || id.includes('/motion/')) return 'vendor-motion';
-          if (id.includes('react-icons'))                            return 'vendor-icons';
-          if (id.includes('@react-three') || id.includes('/three/')) return 'vendor-3d';
-          if (id.includes('node_modules'))                           return 'vendor';
+          // Firebase (modular SDK — keep together for tree-shaking)
+          if (id.includes('node_modules/firebase') || id.includes('node_modules/@firebase'))
+            return 'vendor-firebase';
+
+          // 3D stack — lazy loaded, never in initial bundle
+          if (id.includes('node_modules/three') || id.includes('node_modules/@react-three'))
+            return 'vendor-3d';
+
+          // Framer Motion v12 uses the `motion` package internally
+          if (id.includes('node_modules/framer-motion') || id.includes('node_modules/motion'))
+            return 'vendor-motion';
+
+          // React Icons — large icon set, split away from React core
+          if (id.includes('node_modules/react-icons'))
+            return 'vendor-icons';
+
+          // React core — smallest possible initial chunk
+          if (
+            id.includes('node_modules/react/') ||
+            id.includes('node_modules/react-dom/') ||
+            id.includes('node_modules/scheduler/')
+          )
+            return 'vendor-react';
+
+          // Router — separate so it can be cached independently
+          if (id.includes('node_modules/react-router'))
+            return 'vendor-router';
+
+          // Everything else (zustand, react-hot-toast, headlessui, emailjs, helmet…)
+          if (id.includes('node_modules'))
+            return 'vendor-utils';
         },
       },
     },

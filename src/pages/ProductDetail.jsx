@@ -1,5 +1,5 @@
 // ─── Product Detail Page — Firebase-backed ───────────────────────────────────
-import React, { useState } from 'react';
+import React, { useState, lazy, Suspense } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -20,8 +20,8 @@ import { ProductReviews } from '../components/ui/ReviewSystem';
 import { useRecommendations } from '../hooks/useRecommendations';
 import AIRecommendations from '../components/ui/AIRecommendations';
 
-// 3D and Analytics additions
-import Product3D from '../components/Product3D';
+// 3D viewer — lazy loaded only when user switches to 3D tab
+const Product3D = lazy(() => import('../components/Product3D'));
 import { useProductViews } from '../hooks/useProductViews';
 import { trackEvent } from '../services/analyticsService';
 
@@ -181,7 +181,16 @@ export default function ProductDetail() {
                   exit={{ opacity: 0, scale: 0.98 }}
                   transition={{ duration: 0.35 }}
                 >
-                  <Product3D product={product} />
+                  <Suspense fallback={
+                    <div className="h-[500px] flex items-center justify-center glass rounded-3xl border border-white/5">
+                      <div className="text-center space-y-3">
+                        <div className="w-10 h-10 rounded-full border-2 border-accent-violet/30 border-t-accent-violet animate-spin mx-auto" />
+                        <p className="text-text-muted text-sm">Loading 3D Studio…</p>
+                      </div>
+                    </div>
+                  }>
+                    <Product3D product={product} />
+                  </Suspense>
                 </motion.div>
               ) : (
                 <motion.div
